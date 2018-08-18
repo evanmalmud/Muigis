@@ -14,7 +14,7 @@ public class GhostCircle : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        print("GhostCircle OnTriggerEnter2D: " + collider);
+        //print("GhostCircle OnTriggerEnter2D: " + collider);
         if (collider.gameObject.tag == "Muigi")
         {
             collCount++;
@@ -24,7 +24,7 @@ public class GhostCircle : MonoBehaviour {
 
     void OnTriggerExit2D(Collider2D collider)
     {
-        print("GhostCircle OnTriggerExit2D: " + collider);
+        //print("GhostCircle OnTriggerExit2D: " + collider);
         if (collider.gameObject.tag == "Muigi")
         {
             collCount--;

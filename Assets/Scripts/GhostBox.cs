@@ -13,19 +13,27 @@ public class GhostBox : MonoBehaviour {
 
     void OnTriggerEnter2D(Collider2D collider)
     {
-        print("GhostBox OnTriggerEnter2D: " + collider);
+        //print("GhostBox OnTriggerEnter2D: " + collider);
         if (collider.gameObject.tag == "Flashlight")
         {
             parentAI.HitByLight();
+        }
+        else if (collider.gameObject.tag == "Vac")
+        {
+            parentAI.HitByVac();
         }
     }
 
     void OnTriggerStay2D(Collider2D collider)
     {
-        print("GhostBox OnTriggerStay2D: " + collider);
+        //print("GhostBox OnTriggerStay2D: " + collider);
         if (collider.gameObject.tag == "Flashlight")
         {
             parentAI.HitByLight();
+        }
+        else if (collider.gameObject.tag == "Vac")
+        {
+            parentAI.HitByVac();
         }
     }
 }
