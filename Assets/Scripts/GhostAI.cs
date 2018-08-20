@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,9 @@ public class GhostAI : MonoBehaviour {
 
     public GameObject ChaseRange;
     public GameObject Box;
+
+    public GameObject RedHeart;
+    public GameObject BlueHeart;
 
     public GameObject muigi;
     public bool playerInRange = false;
@@ -32,26 +36,39 @@ public class GhostAI : MonoBehaviour {
     void Start () {
         stunCountdown = stunCountDefault;
         suckCountdown = suckCountDefault;
+        showBlueHeart(false);
+        showRedHeart(false);
     }
 	
 	// Update is called once per frame
 	void FixedUpdate () 
     {
-		if (playerInRange && !stunned && health > 0) {
+		if (playerInRange && !stunned && health > 0 && !beingSucked) {
             MoveToPlayer();
         }
-
         if(stunned) {
             StunnedCountdown();
+        } else {
+            showBlueHeart(false);
+            showRedHeart(false);
         }
 
         if(beingSucked) {
             health -= Time.deltaTime * drainRate;
-            //print(health);
+            showBlueHeart(false);
+            showRedHeart(true);
+            updateRedHeart();
             SuckedCountdown();
+            RunFromPlayer();
+        }
+
+        if(stunned && !beingSucked){
+            showBlueHeart(true);
         }
 
         if(health < 0){
+            Rigidbody2D rb = gameObject.GetComponent<Rigidbody2D>();
+            rb.velocity = Vector2.zero;
             dead = true;
             // kill colliders
             ChaseRange.SetActive(false);
@@ -83,6 +100,21 @@ public class GhostAI : MonoBehaviour {
         }
 	}
 
+    private void showBlueHeart(bool state)
+    {
+        BlueHeart.SetActive(state);
+    }
+
+    private void updateRedHeart()
+    {
+        RedHeart.transform.localScale = new Vector3(health / 100f, health / 100f, 1f);
+    }
+
+    private void showRedHeart(bool state)
+    {
+        RedHeart.SetActive(state);
+    }
+
     public void MoveToPlayer ()
     {
         Vector2 muigiPos = new Vector2(muigi.transform.position.x, muigi.transform.position.y);
@@ -96,6 +128,19 @@ public class GhostAI : MonoBehaviour {
         {
          //ATTACK!
         }
+    }
+
+    public void RunFromPlayer()
+    {
+        Vector3 runVect = transform.position - muigi.transform.position;
+        print(runVect);
+        //runVect.Normalize();
+        //print(runVect);
+        //Vector3 newPos = new Vector3(runVect.x * (100 * Time.deltaTime),
+        //                               runVect.y * (100 * Time.deltaTime),
+         //                              transform.position.z);
+
+        transform.Translate(runVect.normalized * speed * Time.deltaTime);
     }
 
     void StunnedCountdown()

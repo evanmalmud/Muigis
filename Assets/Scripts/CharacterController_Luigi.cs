@@ -1,10 +1,22 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using TMPro;
 using UnityEngine;
 
 public class CharacterController_Luigi : MonoBehaviour {
 
-    public float health = 100;
+    public GameObject MenuManager;
+    public ScreenManager screenManager;
+
+    public int health = 3;
+    public GameObject[] healthIcons;
+    public bool dead = false;
+
+    public GameObject ghostCount;
+    private TextMeshProUGUI ghostCountText;
+    public int ghostsCaptured = 0;
+
+    public GameObject cashCount;
+    private TextMeshProUGUI cashCountText;
+    public int cashCollected = 0;
 
     //public float maxSpeed = 10f;
     bool facingRight = true;
@@ -18,17 +30,24 @@ public class CharacterController_Luigi : MonoBehaviour {
     public GameObject Vac;
 
     public float speed = 30;
-
-    public int ghostsCaptured = 0;
+    public float knockbackSpeed = 50;
 
     private Rigidbody2D rb;
 
     private Animator anim;
 
+    public bool controlsEnabled = false;
+
 
 
 	// Use this for initialization
 	void Start () {
+        MenuManager = GameObject.Find("Manager");
+        screenManager = MenuManager.GetComponent<ScreenManager>();
+        ghostCount = GameObject.Find("GhostText");
+        ghostCountText = ghostCount.GetComponent<TextMeshProUGUI>();
+        cashCount = GameObject.Find("CashText");
+        cashCountText = cashCount.GetComponent<TextMeshProUGUI>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         SetFlashlight(false);
@@ -37,10 +56,25 @@ public class CharacterController_Luigi : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        Move();
-        CheckDirection();
-        CheckFlashlight();
-        CheckVac();
+        if(controlsEnabled)
+        {
+            Move();
+            CheckDirection();
+            CheckFlashlight();
+            CheckVac();
+        }
+    }
+
+    public void resetCharacter()
+    {
+        health = 3;
+        UpdateHealth();
+        ghostsCaptured = 0;
+        UpdateCashCount();
+        cashCollected = 0;
+        UpdateGhostCount();
+        SetFlashlight(false);
+        SetVac(false);
     }
 
     void FlipHorizontal()
@@ -78,7 +112,18 @@ public class CharacterController_Luigi : MonoBehaviour {
             FlipVertical();
 
         // Animator Setup
-        if ((Input.GetAxis("Horizontal") > Input.GetAxis("Vertical"))) //Moving faster in X axis
+        float xVel = Mathf.Abs(rb.velocity.x);
+        float yVel = Mathf.Abs(rb.velocity.y);
+        //print(xVel + yVel);
+        if (xVel < 0.5f && yVel < 0.5f)
+        {
+            anim.SetBool("WalkDown", false);
+            anim.SetBool("WalkRight", false);
+            anim.SetBool("WalkLeft", false);
+            anim.SetBool("WalkUp", false);
+            anim.SetBool("Idle", true);
+        }
+        else if (xVel > yVel) //Moving faster in X axis
         {
             if (facingRight)
             {
@@ -86,12 +131,14 @@ public class CharacterController_Luigi : MonoBehaviour {
                 anim.SetBool("WalkRight", true);
                 anim.SetBool("WalkLeft", false);
                 anim.SetBool("WalkUp", false);
+                anim.SetBool("Idle", false);
             }
             else{
                 anim.SetBool("WalkDown", false);
                 anim.SetBool("WalkRight", false);
                 anim.SetBool("WalkLeft", true);
                 anim.SetBool("WalkUp", false);
+                anim.SetBool("Idle", false);
             }
         }
         else //Moving faster in Y axis
@@ -102,6 +149,7 @@ public class CharacterController_Luigi : MonoBehaviour {
                 anim.SetBool("WalkRight", false);
                 anim.SetBool("WalkLeft", false);
                 anim.SetBool("WalkUp", true);
+                anim.SetBool("Idle", false);
             }
             else
             {
@@ -109,6 +157,7 @@ public class CharacterController_Luigi : MonoBehaviour {
                 anim.SetBool("WalkRight", false);
                 anim.SetBool("WalkLeft", false);
                 anim.SetBool("WalkUp", false);
+                anim.SetBool("Idle", false);
             }
         }
     }
@@ -146,5 +195,53 @@ public class CharacterController_Luigi : MonoBehaviour {
     public void GhostCaptured()
     {
         ghostsCaptured++;
+        UpdateGhostCount();
+    }
+
+    public void Hurt(Collider2D collider)
+    {
+        health--;
+        Vector2 knockback = new Vector2(transform.position.x - collider.gameObject.transform.position.x,
+                                        transform.position.y - collider.gameObject.transform.position.y);
+        knockback.Normalize();
+        //print(knockback);
+        rb.AddForce(knockback * speed * knockbackSpeed, ForceMode2D.Force);
+        UpdateHealth();
+        CheckDead();
+    }
+    
+    public void UpdateHealth()
+    {
+        int healthcount = 0;
+        foreach (GameObject healthicon in healthIcons)
+        {
+            if (healthcount < health){
+                healthicon.SetActive(true);
+            } 
+            else
+            {
+                healthicon.SetActive(false);
+            }
+            healthcount++;
+        }
+    }
+
+    public void UpdateGhostCount()
+    {
+        ghostCountText.text = ghostsCaptured.ToString();
+    }
+
+    public void UpdateCashCount()
+    {
+        cashCountText.text = cashCollected.ToString();
+    }
+
+    public void CheckDead()
+    {
+        if(health <= 0 )
+        {
+            dead = true;
+            screenManager.gameOver();
+        }
     }
 }
