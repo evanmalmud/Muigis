@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class GhostAI : MonoBehaviour {
 
@@ -32,8 +29,13 @@ public class GhostAI : MonoBehaviour {
     public bool dead = false;
     private float zRot = 0;
 
+    bool facingRight = true;
+    Rigidbody2D rb;
+
     // Use this for initialization
     void Start () {
+        muigi = GameObject.Find("Muigi");
+        rb = GetComponent<Rigidbody2D>();
         stunCountdown = stunCountDefault;
         suckCountdown = suckCountDefault;
         showBlueHeart(false);
@@ -45,7 +47,10 @@ public class GhostAI : MonoBehaviour {
     {
 		if (playerInRange && !stunned && health > 0 && !beingSucked) {
             MoveToPlayer();
+        } else {
+            MoveRandom();
         }
+
         if(stunned) {
             StunnedCountdown();
         } else {
@@ -81,6 +86,7 @@ public class GhostAI : MonoBehaviour {
             Vector2 objPos = new Vector2(transform.position.x, transform.position.y);
             float journeyLength = Vector2.Distance(objPos, muigiPos);
             float distanceFrac = speed * Time.deltaTime / journeyLength;
+            VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, muigiPos, distanceFrac));
             transform.position = Vector2.Lerp(objPos, muigiPos, distanceFrac);
                 // shrink in size
             //float newScale = Mathf.SmoothDamp(transform.localScale.x, 0f, ref scaleScaling, smoothDampTime);
@@ -98,7 +104,20 @@ public class GhostAI : MonoBehaviour {
                 Destroy(this.gameObject);
             }
         }
-	}
+
+    }
+
+    private void VerifyMovingDirection(Vector3 position, Vector2 vector2)
+    {
+        if (position.x > vector2.x && !facingRight) //Moving Left
+        {
+            FlipHorizontal();
+        }
+        else if (position.x < vector2.x && facingRight) //Moving Right
+        {
+            FlipHorizontal();
+        }
+    }
 
     private void showBlueHeart(bool state)
     {
@@ -122,12 +141,58 @@ public class GhostAI : MonoBehaviour {
         float journeyLength = Vector2.Distance(objPos, muigiPos);
         float distanceFrac = speed * Time.deltaTime / journeyLength;
         if (journeyLength > attackRange) {
+            VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, muigiPos, distanceFrac));
             transform.position = Vector2.Lerp(objPos, muigiPos, distanceFrac);
         }
         else
         {
          //ATTACK!
         }
+    }
+
+    public void MoveRandom()
+    {
+        // 0  1  2
+        // 3     4
+        // 5  6  7
+        int randomDir = Random.Range(0, 7);
+        Vector2 temp;
+        if (randomDir <= 2)
+        {
+            temp.y = 1f;
+        }
+        else if (randomDir >= 5)
+        {
+            temp.y = -1f;
+        } 
+        else
+        {
+            temp.y = 0f;
+        }
+        if (randomDir == 0 || randomDir == 3 || randomDir == 5)
+        {
+            temp.x = -1f;
+        }
+        else if (randomDir == 2 || randomDir == 4 || randomDir == 7)
+        {
+            temp.x = 1f;
+        }
+        else
+        {
+            temp.x = 0f;
+        }
+        //transform.position = new Vector3(newXpos, newYpos, transform.position.z);
+        //Vector2 toPos = new Vector2(transform.position.x + temp.x, transform.position.y + temp.y);
+        //Vector2 objPos = new Vector2(transform.position.x, transform.position.y);
+        //float journeyLength = Vector2.Distance(objPos, toPos);
+        //float distanceFrac = speed * Time.deltaTime / journeyLength;
+        //VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, toPos, distanceFrac));
+        //transform.position = Vector2.Lerp(objPos, toPos, distanceFrac);
+
+        //temp.Normalize();
+       //temp = temp * speed * Time.deltaTime;
+        //temp = new Vector2(transform.position.x + temp.x, transform.position.y + temp.y);
+        //transform.position = temp;
     }
 
     public void RunFromPlayer()
@@ -182,5 +247,13 @@ public class GhostAI : MonoBehaviour {
     public void setPlayerInRange(bool range)
     {
         playerInRange = range;
+    }
+
+    void FlipHorizontal()
+    {
+        facingRight = !facingRight;
+        Vector3 localScale = transform.localScale;
+        localScale.x *= -1;
+        transform.localScale = localScale;
     }
 }

@@ -12,8 +12,13 @@ public class ScreenManager : MonoBehaviour {
     public GameObject muigi;
     private CharacterController_Luigi ccmuigi;
     public float fadeInTime = 3f;
+
+    public GameObject spawnerGameObject;
+    public Spawner spawner;
+
 	// Use this for initialization
 	void Start () {
+        spawner = spawnerGameObject.GetComponent<Spawner>();
         MainMenuCanvasGroup = MainMenuScreen.GetComponent<CanvasGroup>();
         GameOverCanvasGroup = GameOverScreen.GetComponent<CanvasGroup>();
         MainMenuScreen.SetActive(true);
@@ -27,6 +32,7 @@ public class ScreenManager : MonoBehaviour {
     {
         FadeOut(MainMenuCanvasGroup);
         changePlayerState(true);
+        spawner.setSpawn(true);
     }
 
     public void replay()
@@ -34,12 +40,15 @@ public class ScreenManager : MonoBehaviour {
         FadeOut(GameOverCanvasGroup);
         ccmuigi.resetCharacter();
         changePlayerState(true);
+        spawner.setSpawn(true);
     }
 
     public void gameOver()
     {
+        GameOverScreen.SetActive(true);
         FadeIn(GameOverCanvasGroup);
         changePlayerState(false);
+        spawner.deleteAll();
     }
 
 
@@ -83,9 +92,9 @@ public class ScreenManager : MonoBehaviour {
 
     IEnumerator FadeInCor(CanvasGroup canvasgroup)
     {
-        while (canvasgroup.alpha < 255)
+        while (canvasgroup.alpha < 1)
         {
-            canvasgroup.alpha += Time.deltaTime / 2;
+            canvasgroup.alpha += Time.deltaTime * 2;
             yield return null;
         }
         canvasgroup.interactable = true;
