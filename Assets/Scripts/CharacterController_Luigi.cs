@@ -1,4 +1,5 @@
-﻿using TMPro;
+﻿using System;
+using TMPro;
 using UnityEngine;
 
 public class CharacterController_Luigi : MonoBehaviour {
@@ -38,6 +39,10 @@ public class CharacterController_Luigi : MonoBehaviour {
 
     public bool controlsEnabled = false;
 
+    public float invulnerableTime = 2f;
+    private float invulnerableCount = 0f;
+    public bool invulnerable = false;
+
 
 
 	// Use this for initialization
@@ -62,6 +67,21 @@ public class CharacterController_Luigi : MonoBehaviour {
             CheckDirection();
             CheckFlashlight();
             CheckVac();
+            print("flash: " + flashlight + " vac: " + vac);
+            InvulnerableCheck();
+        }
+    }
+
+    private void InvulnerableCheck()
+    {
+        if (invulnerableCount >= invulnerableTime)
+        {
+            invulnerable = false;
+            invulnerableCount = 0f;
+        }
+        else
+        {
+            invulnerableCount += Time.deltaTime;
         }
     }
 
@@ -75,6 +95,8 @@ public class CharacterController_Luigi : MonoBehaviour {
         UpdateGhostCount();
         SetFlashlight(false);
         SetVac(false);
+        invulnerable = false;
+        invulnerableCount = 0f;
     }
 
     void FlipHorizontal()
@@ -166,18 +188,36 @@ public class CharacterController_Luigi : MonoBehaviour {
     {
         if(Input.GetKeyDown("f"))
         {
-            flashlight = !flashlight;
-            Flashlight.SetActive(flashlight);
+            ToggleFlashlight();
         }
+        if(flashlight && vac)
+        {
+            ToggleVac();
+        }
+    }
+
+    void ToggleFlashlight()
+    {
+        flashlight = !flashlight;
+        Flashlight.SetActive(flashlight);
     }
 
     void CheckVac()
     {
         if (Input.GetKeyDown("v"))
         {
-            vac = !vac;
-            Vac.SetActive(vac);
+            ToggleVac();
         }
+        if (flashlight && vac)
+        {
+            ToggleFlashlight();
+        }
+    }
+
+    void ToggleVac()
+    {
+        vac = !vac;
+        Vac.SetActive(vac);
     }
 
     void SetFlashlight(bool setVal)
@@ -199,15 +239,19 @@ public class CharacterController_Luigi : MonoBehaviour {
     }
 
     public void Hurt(Collider2D collider)
-    {
-        health--;
-        Vector2 knockback = new Vector2(transform.position.x - collider.gameObject.transform.position.x,
-                                        transform.position.y - collider.gameObject.transform.position.y);
-        knockback.Normalize();
-        //print(knockback);
-        rb.AddForce(knockback * speed * knockbackSpeed, ForceMode2D.Force);
-        UpdateHealth();
-        CheckDead();
+    {   
+        if(!invulnerable)
+        {
+            health--;
+            Vector2 knockback = new Vector2(transform.position.x - collider.gameObject.transform.position.x,
+                                            transform.position.y - collider.gameObject.transform.position.y);
+            knockback.Normalize();
+            //print(knockback);
+            rb.AddForce(knockback * speed * knockbackSpeed, ForceMode2D.Force);
+            UpdateHealth();
+            CheckDead();
+            invulnerable = true;
+        }
     }
     
     public void UpdateHealth()

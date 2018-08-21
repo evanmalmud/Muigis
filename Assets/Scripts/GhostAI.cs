@@ -14,6 +14,7 @@ public class GhostAI : MonoBehaviour {
     public float stunCountDefault = 1f;
     float stunCountdown;
     public float speed = 3f;
+    public float runAwaySpeed = 6f;
     public float health = 100f;
     public float drainRate = 8000f;
     public float attackRange = 1.5f;
@@ -32,12 +33,29 @@ public class GhostAI : MonoBehaviour {
     bool facingRight = true;
     Rigidbody2D rb;
 
+    bool movingRandomly = false;
+    float movingRandomlyTime = 2f;
+    float movingRandomlyCount = 0f;
+    Vector2 travelPos = new Vector2();
+
+    bool hitByLight = false;
+    bool hitByVac = false;
+    bool canBeHitByFlash = true;
+    public float flashLightCooldownDefault = 2f;
+    private float flashLightCooldownCount = 0f;
+
     // Use this for initialization
     void Start () {
         muigi = GameObject.Find("Muigi");
         rb = GetComponent<Rigidbody2D>();
         stunCountdown = stunCountDefault;
         suckCountdown = suckCountDefault;
+        flashLightCooldownCount = flashLightCooldownDefault;
+        canBeHitByFlash = true;
+        stunned = false;
+        beingSucked = false;
+        hitByLight = false;
+        hitByVac = false;
         showBlueHeart(false);
         showRedHeart(false);
     }
@@ -45,30 +63,48 @@ public class GhostAI : MonoBehaviour {
 	// Update is called once per frame
 	void FixedUpdate () 
     {
+        if(hitByLight){
+            //check for light cooldown
+            if(canBeHitByFlash)
+            {
+                stunned = true;
+                canBeHitByFlash = false;
+            }
+            hitByLight = false;
+        }
+        FlashlightCooldown();
+        if (hitByVac)
+        {
+            //
+            if(stunned){
+                beingSucked = true;
+                stunCountdown = stunCountDefault;
+            }
+            hitByVac = false;
+        }
 		if (playerInRange && !stunned && health > 0 && !beingSucked) {
             MoveToPlayer();
-        } else {
+        } else if (!stunned && health > 0 && !beingSucked) {
             MoveRandom();
         }
-
-        if(stunned) {
-            StunnedCountdown();
+        SuckedCountdown();
+        StunnedCountdown();
+        if (stunned) {
+            if (beingSucked)
+            {
+                health -= Time.deltaTime * drainRate;
+                showBlueHeart(false);
+                showRedHeart(true);
+                updateRedHeart();
+                RunFromPlayer();
+            }
+            else
+            {
+                showBlueHeart(true);
+            }
         } else {
             showBlueHeart(false);
             showRedHeart(false);
-        }
-
-        if(beingSucked) {
-            health -= Time.deltaTime * drainRate;
-            showBlueHeart(false);
-            showRedHeart(true);
-            updateRedHeart();
-            SuckedCountdown();
-            RunFromPlayer();
-        }
-
-        if(stunned && !beingSucked){
-            showBlueHeart(true);
         }
 
         if(health < 0){
@@ -148,100 +184,133 @@ public class GhostAI : MonoBehaviour {
         {
          //ATTACK!
         }
+        //
     }
 
-    public void MoveRandom()
+    void MoveRandomReset()
     {
-        // 0  1  2
-        // 3     4
-        // 5  6  7
-        int randomDir = Random.Range(0, 7);
-        Vector2 temp;
-        if (randomDir <= 2)
-        {
-            temp.y = 1f;
-        }
-        else if (randomDir >= 5)
-        {
-            temp.y = -1f;
-        } 
-        else
-        {
-            temp.y = 0f;
-        }
-        if (randomDir == 0 || randomDir == 3 || randomDir == 5)
-        {
-            temp.x = -1f;
-        }
-        else if (randomDir == 2 || randomDir == 4 || randomDir == 7)
-        {
-            temp.x = 1f;
-        }
-        else
-        {
-            temp.x = 0f;
-        }
-        //transform.position = new Vector3(newXpos, newYpos, transform.position.z);
-        //Vector2 toPos = new Vector2(transform.position.x + temp.x, transform.position.y + temp.y);
-        //Vector2 objPos = new Vector2(transform.position.x, transform.position.y);
-        //float journeyLength = Vector2.Distance(objPos, toPos);
-        //float distanceFrac = speed * Time.deltaTime / journeyLength;
-        //VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, toPos, distanceFrac));
-        //transform.position = Vector2.Lerp(objPos, toPos, distanceFrac);
+        movingRandomly = false;
+        movingRandomlyCount = 0f;
+    }
 
-        //temp.Normalize();
-       //temp = temp * speed * Time.deltaTime;
-        //temp = new Vector2(transform.position.x + temp.x, transform.position.y + temp.y);
-        //transform.position = temp;
+        public void MoveRandom()
+    {
+        if (movingRandomly && movingRandomlyCount <= movingRandomlyTime)
+        {
+            movingRandomlyCount += Time.deltaTime;
+            //Keep Moving to position
+            Vector2 objPos = new Vector2(transform.position.x, transform.position.y);
+            float journeyLength = Vector2.Distance(objPos, travelPos);
+            float distanceFrac = speed * Time.deltaTime / journeyLength;
+            VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, travelPos, distanceFrac));
+            transform.position = Vector2.Lerp(objPos, travelPos, distanceFrac);
+        }
+        else
+        {
+            movingRandomly = true;
+            movingRandomlyCount = 0f;
+            //Calc new position to move to
+            // 0  1  2
+            // 3     4
+            // 5  6  7
+            int randomDir = Random.Range(0, 7);
+            Vector3 temp = transform.position;
+            if (randomDir <= 2)
+            {
+                temp.y = 1f;
+            }
+            else if (randomDir >= 5)
+            {
+                temp.y = -1f;
+            }
+            else
+            {
+                temp.y = 0f;
+            }
+            if (randomDir == 0 || randomDir == 3 || randomDir == 5)
+            {
+                temp.x = -1f;
+            }
+            else if (randomDir == 2 || randomDir == 4 || randomDir == 7)
+            {
+                temp.x = 1f;
+            }
+            else
+            {
+                temp.x = 0f;
+            }
+            travelPos = new Vector2(temp.x + transform.position.x, temp.y + transform.position.y);
+            Vector2 objPos = new Vector2(transform.position.x, transform.position.y);
+            float journeyLength = Vector2.Distance(objPos, travelPos);
+            float distanceFrac = speed * Time.deltaTime / journeyLength;
+            VerifyMovingDirection(transform.position, Vector2.Lerp(objPos, travelPos, distanceFrac));
+            transform.position = Vector2.Lerp(objPos, travelPos, distanceFrac);
+        }
     }
 
     public void RunFromPlayer()
     {
         Vector3 runVect = transform.position - muigi.transform.position;
-        print(runVect);
-        //runVect.Normalize();
-        //print(runVect);
-        //Vector3 newPos = new Vector3(runVect.x * (100 * Time.deltaTime),
-        //                               runVect.y * (100 * Time.deltaTime),
-         //                              transform.position.z);
-
-        transform.Translate(runVect.normalized * speed * Time.deltaTime);
+        VerifyMovingDirection(transform.position, transform.position + (runVect.normalized * runAwaySpeed * Time.deltaTime));
+        transform.Translate(runVect.normalized * runAwaySpeed * Time.deltaTime);
     }
 
     void StunnedCountdown()
     {
-        if (stunCountdown > 0)
+        if(stunned)
         {
-            stunCountdown -= Time.deltaTime;
-        }
-        else
-        {
-            stunCountdown = stunCountDefault;
-            stunned = false;
+            if (stunCountdown > 0)
+            {
+                stunCountdown -= Time.deltaTime;
+            }
+            else
+            {
+                stunCountdown = stunCountDefault;
+                stunned = false;
+            }
         }
     }
 
     void SuckedCountdown()
-    {
-        if (suckCountdown > 0)
+    {  
+        if(beingSucked)
         {
-            suckCountdown -= Time.deltaTime;
+            if (suckCountdown > 0)
+            {
+                suckCountdown -= Time.deltaTime;
+            }
+            else
+            {
+                suckCountdown = suckCountDefault;
+                beingSucked = false;
+            }
         }
-        else
+    }
+
+    void FlashlightCooldown()
+    {
+        if (!canBeHitByFlash)
         {
-            suckCountdown = suckCountDefault;
-            beingSucked = false;
+            if (flashLightCooldownCount > 0)
+            {
+                flashLightCooldownCount -= Time.deltaTime;
+            }
+            else
+            {
+                flashLightCooldownCount = flashLightCooldownDefault;
+                canBeHitByFlash = true;
+            }
         }
     }
 
     public void HitByLight()
     {
-        stunned = true;
+        hitByLight = true;
     }
 
     public void HitByVac()
     {
-        beingSucked = true;
+        hitByVac = true;
     }
 
     public void setPlayerInRange(bool range)
