@@ -54,6 +54,9 @@ TagManager:
   - name: Luigi_Enemy
     uniqueID: 261284497
     locked: 0
+  - name: Objects in from of player
+    uniqueID: 3812784705
+    locked: 0
   - name: UI
     uniqueID: 1175375925
     locked: 0

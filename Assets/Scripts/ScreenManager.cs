@@ -101,4 +101,10 @@ public class ScreenManager : MonoBehaviour {
         yield return null;
     }
 
+    public void Quit()
+    {
+        //print("Quit");
+        Application.Quit();
+    }
+
 }

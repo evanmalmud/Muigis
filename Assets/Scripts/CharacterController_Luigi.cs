@@ -15,14 +15,14 @@ public class CharacterController_Luigi : MonoBehaviour {
     private TextMeshProUGUI ghostCountText;
     public int ghostsCaptured = 0;
 
-    public GameObject cashCount;
-    private TextMeshProUGUI cashCountText;
-    public int cashCollected = 0;
+    //public GameObject cashCount;
+    //private TextMeshProUGUI cashCountText;
+    //public int cashCollected = 0;
 
     //public float maxSpeed = 10f;
     bool facingRight = true;
     bool facingUp = true;
-    bool scream = false;
+    //bool scream = false;
 
     bool flashlight = false;
     public GameObject Flashlight;
@@ -51,8 +51,8 @@ public class CharacterController_Luigi : MonoBehaviour {
         screenManager = MenuManager.GetComponent<ScreenManager>();
         ghostCount = GameObject.Find("GhostText");
         ghostCountText = ghostCount.GetComponent<TextMeshProUGUI>();
-        cashCount = GameObject.Find("CashText");
-        cashCountText = cashCount.GetComponent<TextMeshProUGUI>();
+        //cashCount = GameObject.Find("CashText");
+        //cashCountText = cashCount.GetComponent<TextMeshProUGUI>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         SetFlashlight(false);
@@ -67,7 +67,7 @@ public class CharacterController_Luigi : MonoBehaviour {
             CheckDirection();
             CheckFlashlight();
             CheckVac();
-            print("flash: " + flashlight + " vac: " + vac);
+            //print("flash: " + flashlight + " vac: " + vac);
             InvulnerableCheck();
         }
     }
@@ -90,8 +90,8 @@ public class CharacterController_Luigi : MonoBehaviour {
         health = 3;
         UpdateHealth();
         ghostsCaptured = 0;
-        UpdateCashCount();
-        cashCollected = 0;
+        //UpdateCashCount();
+        //cashCollected = 0;
         UpdateGhostCount();
         SetFlashlight(false);
         SetVac(false);
@@ -275,10 +275,10 @@ public class CharacterController_Luigi : MonoBehaviour {
         ghostCountText.text = ghostsCaptured.ToString();
     }
 
-    public void UpdateCashCount()
-    {
-        cashCountText.text = cashCollected.ToString();
-    }
+    //public void UpdateCashCount()
+    //{
+    //   cashCountText.text = cashCollected.ToString();
+    //}
 
     public void CheckDead()
     {

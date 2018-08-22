@@ -12,7 +12,15 @@ public class MuigiBox : MonoBehaviour {
     }
     void OnTriggerEnter2D(Collider2D collider)
     {
-        //print("test" + collider.gameObject);
+        //print("OnTriggerEnter2D" + collider.gameObject);
+        if (collider.gameObject.tag == "Ghost")
+        {
+            parentClass.Hurt(collider);
+        }
+    }    
+    void OnTriggerStay2D(Collider2D collider)
+    {
+        //print("OnTriggerStay2D" + collider.gameObject);
         if (collider.gameObject.tag == "Ghost")
         {
             parentClass.Hurt(collider);

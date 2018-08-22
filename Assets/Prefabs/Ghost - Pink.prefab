@@ -240,7 +240,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0.0022470355, y: -0.06066954}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -251,7 +251,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.2854494, y: 0.55509114}
   m_EdgeRadius: 0
 --- !u!114 &114222920823018216
 MonoBehaviour:
@@ -272,13 +272,18 @@ MonoBehaviour:
   playerInRange: 0
   stunned: 0
   stunCountDefault: 1
-  speed: 1
-  health: 100
+  speed: 1.5
+  runAwaySpeed: 2
+  health: 150
   drainRate: 80
-  attackRange: 0.5
+  attackRange: 0.2
   attackDamage: 2
   beingSucked: 0
   dead: 0
+  flashLightCooldownDefault: 4
+  runTimeDefault: 1
+  runTimeCount: 0
+  running: 0
 --- !u!114 &114627933625133838
 MonoBehaviour:
   m_ObjectHideFlags: 1

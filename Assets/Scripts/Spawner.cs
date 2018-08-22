@@ -19,17 +19,46 @@ public class Spawner : MonoBehaviour {
 
     public List<GameObject> listGhosts;
 
+    public float timePlaying = 0f;
+    public bool startCounting = false;
+
     // Use this for initialization
     void Start () {
         InvokeRepeating("Spawn", spawnTime, spawnTime);
 	}
-	
-	// Update is called once per frame
-	void Spawn () {
+
+    void Update()
+    {
+        if(startCounting)
+        {
+            timePlaying += Time.deltaTime;
+        }
+    }
+
+    // Update is called once per frame
+    void Spawn () {
         if(spawnActive)
         {
+            float val = Random.value;
+            int enemyNum = 0;
+            //if (timePlaying > 0f){
+                if(val > .5) //50% chance
+                {
+                    enemyNum = 0;
+                }
+                else if ( val > .2)
+                {
+                    enemyNum = 1;
+                }
+                else if ( val > .1)
+                {
+                    enemyNum = 2;
+                }
+                else {
+                    enemyNum = 3;
+                }
+            //}
             int spawnPointNum = Random.Range(0, spawnPoints.Length);
-            int enemyNum = Random.Range(0, ghosts.Length);
             GameObject temp = Instantiate(ghosts[enemyNum], spawnPoints[spawnPointNum].transform);
             listGhosts.Add(temp);
         }
@@ -43,10 +72,12 @@ public class Spawner : MonoBehaviour {
         }
         listGhosts.Clear();
         spawnActive = false;
+        startCounting = false;
     }
 
     public void setSpawn(bool state)
     {
         spawnActive = state;
+        startCounting = state;
     }
 }

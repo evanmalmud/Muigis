@@ -22,7 +22,7 @@ public class GhostAI : MonoBehaviour {
 
     public bool beingSucked = false;
     private float suckCountDefault = 1f;
-    float suckCountdown;
+    //float suckCountdown;
 
     private float scaleScaling = 0.0f;
     private float smoothDampTime = 1.5f;
@@ -31,7 +31,7 @@ public class GhostAI : MonoBehaviour {
     private float zRot = 0;
 
     bool facingRight = true;
-    Rigidbody2D rb;
+    //Rigidbody2D rb;
 
     bool movingRandomly = false;
     float movingRandomlyTime = 2f;
@@ -44,12 +44,16 @@ public class GhostAI : MonoBehaviour {
     public float flashLightCooldownDefault = 2f;
     private float flashLightCooldownCount = 0f;
 
+    public float runTimeDefault = 1f;
+    public float runTimeCount = 0f;
+    public bool running = false;
+
     // Use this for initialization
-    void Start () {
+    void Start() {
         muigi = GameObject.Find("Muigi");
-        rb = GetComponent<Rigidbody2D>();
+        //rb = GetComponent<Rigidbody2D>();
         stunCountdown = stunCountDefault;
-        suckCountdown = suckCountDefault;
+        //suckCountdown = suckCountDefault;
         flashLightCooldownCount = flashLightCooldownDefault;
         canBeHitByFlash = true;
         stunned = false;
@@ -58,14 +62,16 @@ public class GhostAI : MonoBehaviour {
         hitByVac = false;
         showBlueHeart(false);
         showRedHeart(false);
+        runTimeCount = 0f;
+        running = false;
     }
-	
-	// Update is called once per frame
-	void FixedUpdate () 
+
+    // Update is called once per frame
+    void FixedUpdate()
     {
-        if(hitByLight){
+        if (hitByLight) {
             //check for light cooldown
-            if(canBeHitByFlash)
+            if (canBeHitByFlash)
             {
                 stunned = true;
                 canBeHitByFlash = false;
@@ -76,38 +82,59 @@ public class GhostAI : MonoBehaviour {
         if (hitByVac)
         {
             //
-            if(stunned){
+            if (stunned || beingSucked) {
                 beingSucked = true;
                 stunCountdown = stunCountDefault;
             }
+            else {
+                beingSucked = false;
+            }
+            stunned = false;
             hitByVac = false;
         }
-		if (playerInRange && !stunned && health > 0 && !beingSucked) {
-            MoveToPlayer();
-        } else if (!stunned && health > 0 && !beingSucked) {
-            MoveRandom();
-        }
-        SuckedCountdown();
-        StunnedCountdown();
-        if (stunned) {
+        else
+        {
             if (beingSucked)
             {
-                health -= Time.deltaTime * drainRate;
-                showBlueHeart(false);
-                showRedHeart(true);
-                updateRedHeart();
-                RunFromPlayer();
+                beingSucked = false;
+                running = true;
+                runTimeCount = runTimeDefault;
             }
-            else
-            {
-                showBlueHeart(true);
-            }
+        }
+
+        if (playerInRange && !stunned && health > 0 && !beingSucked && !running) 
+        {
+            MoveToPlayer();
+        } 
+        else if (!stunned && health > 0 && !beingSucked && !running) 
+        {
+            MoveRandom();
+        } 
+        else if (running) 
+        {
+            RunFromPlayer();
+        }
+
+        RunningCountdown();
+        StunnedCountdown();
+        if (stunned) {
+            showBlueHeart(true);
+            showRedHeart(false);
         } else {
             showBlueHeart(false);
             showRedHeart(false);
         }
 
-        if(health < 0){
+        if (beingSucked)
+        {
+            health -= Time.deltaTime * drainRate;
+            showBlueHeart(false);
+            showRedHeart(true);
+            updateRedHeart();
+            RunFromPlayer();
+        }
+
+        if (health < 0){
             Rigidbody2D rb = gameObject.GetComponent<Rigidbody2D>();
             rb.velocity = Vector2.zero;
             dead = true;
@@ -271,18 +298,18 @@ public class GhostAI : MonoBehaviour {
         }
     }
 
-    void SuckedCountdown()
+    void RunningCountdown()
     {  
-        if(beingSucked)
+        if(running)
         {
-            if (suckCountdown > 0)
+            if (runTimeCount > 0)
             {
-                suckCountdown -= Time.deltaTime;
+                runTimeCount -= Time.deltaTime;
             }
             else
             {
-                suckCountdown = suckCountDefault;
-                beingSucked = false;
+                runTimeCount = suckCountDefault;
+                running = false;
             }
         }
     }
