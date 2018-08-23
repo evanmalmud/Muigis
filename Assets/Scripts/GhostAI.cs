@@ -48,8 +48,11 @@ public class GhostAI : MonoBehaviour {
     public float runTimeCount = 0f;
     public bool running = false;
 
+    private AudioSource audioData;
+
     // Use this for initialization
     void Start() {
+        audioData = GetComponent<AudioSource>();
         muigi = GameObject.Find("Muigi");
         //rb = GetComponent<Rigidbody2D>();
         stunCountdown = stunCountDefault;
@@ -73,6 +76,7 @@ public class GhostAI : MonoBehaviour {
             //check for light cooldown
             if (canBeHitByFlash)
             {
+                audioData.Play();
                 stunned = true;
                 canBeHitByFlash = false;
             }

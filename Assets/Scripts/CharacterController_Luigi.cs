@@ -26,6 +26,7 @@ public class CharacterController_Luigi : MonoBehaviour {
 
     bool flashlight = false;
     public GameObject Flashlight;
+    public GameObject FlashlightOff;
 
     bool vac = false;
     public GameObject Vac;
@@ -43,10 +44,15 @@ public class CharacterController_Luigi : MonoBehaviour {
     private float invulnerableCount = 0f;
     public bool invulnerable = false;
 
+    public AudioClip[] muigiclips;
+    public AudioClip[] doorclips;
+    public bool nearDoor = false;
+    private AudioSource audioData;
 
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    void Start () {
+        audioData = GetComponent<AudioSource>();
         MenuManager = GameObject.Find("Manager");
         screenManager = MenuManager.GetComponent<ScreenManager>();
         ghostCount = GameObject.Find("GhostText");
@@ -69,6 +75,7 @@ public class CharacterController_Luigi : MonoBehaviour {
             CheckVac();
             //print("flash: " + flashlight + " vac: " + vac);
             InvulnerableCheck();
+            CheckInteractive();
         }
     }
 
@@ -200,6 +207,7 @@ public class CharacterController_Luigi : MonoBehaviour {
     {
         flashlight = !flashlight;
         Flashlight.SetActive(flashlight);
+        FlashlightOff.SetActive(!flashlight);
     }
 
     void CheckVac()
@@ -214,6 +222,24 @@ public class CharacterController_Luigi : MonoBehaviour {
         }
     }
 
+    void CheckInteractive()
+    {
+        if (Input.GetKeyDown("e"))
+        {
+            if (nearDoor)
+            {
+                int audoClipint = UnityEngine.Random.Range(0, doorclips.Length);
+                audioData.clip = doorclips[audoClipint];
+                audioData.Play();
+            }
+            else{
+                int audoClipint = UnityEngine.Random.Range(0, muigiclips.Length);
+                audioData.clip = muigiclips[audoClipint];
+                audioData.Play();
+            }
+        }
+    }
+
     void ToggleVac()
     {
         vac = !vac;
@@ -224,6 +250,7 @@ public class CharacterController_Luigi : MonoBehaviour {
     {
         flashlight = setVal;
         Flashlight.SetActive(flashlight);
+        FlashlightOff.SetActive(!flashlight);
     }
 
     void SetVac(bool setVal)
@@ -285,6 +312,7 @@ public class CharacterController_Luigi : MonoBehaviour {
         if(health <= 0 )
         {
             dead = true;
+            resetCharacter();
             screenManager.gameOver();
         }
     }

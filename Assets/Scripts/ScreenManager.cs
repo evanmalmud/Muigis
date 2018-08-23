@@ -8,6 +8,8 @@ public class ScreenManager : MonoBehaviour {
     private CanvasGroup MainMenuCanvasGroup;
     public GameObject GameOverScreen;
     private CanvasGroup GameOverCanvasGroup;
+    public GameObject ControlsScreen;
+    private CanvasGroup ControlsCanvasGroup;
 
     public GameObject muigi;
     private CharacterController_Luigi ccmuigi;
@@ -21,18 +23,28 @@ public class ScreenManager : MonoBehaviour {
         spawner = spawnerGameObject.GetComponent<Spawner>();
         MainMenuCanvasGroup = MainMenuScreen.GetComponent<CanvasGroup>();
         GameOverCanvasGroup = GameOverScreen.GetComponent<CanvasGroup>();
+        ControlsCanvasGroup = ControlsScreen.GetComponent<CanvasGroup>();
         MainMenuScreen.SetActive(true);
         GameOverScreen.SetActive(false);
+        ControlsScreen.SetActive(false);
         ccmuigi = muigi.GetComponent<CharacterController_Luigi>();
         ResetCanvas(GameOverCanvasGroup);
+        ResetCanvas(ControlsCanvasGroup);
         EnableCanvas(MainMenuCanvasGroup);
     }
 
     public void play()
     {
-        FadeOut(MainMenuCanvasGroup);
+        FadeOut(ControlsCanvasGroup);
         changePlayerState(true);
         spawner.setSpawn(true);
+    }
+
+    public void showControls()
+    {
+        FadeOut(MainMenuCanvasGroup);
+        ControlsScreen.SetActive(true);
+        FadeIn(ControlsCanvasGroup);
     }
 
     public void replay()

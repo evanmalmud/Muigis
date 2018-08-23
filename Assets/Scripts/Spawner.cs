@@ -22,16 +22,31 @@ public class Spawner : MonoBehaviour {
     public float timePlaying = 0f;
     public bool startCounting = false;
 
+    public AudioClip[] ghostlaughclips;
+    private AudioSource audioData;
+
     // Use this for initialization
     void Start () {
+        audioData = GetComponent<AudioSource>();
         InvokeRepeating("Spawn", spawnTime, spawnTime);
 	}
 
     void Update()
     {
-        if(startCounting)
+        if (startCounting)
         {
             timePlaying += Time.deltaTime;
+            if (!audioData.isPlaying)
+            {
+                float val = Random.Range(0, 1000);
+                //print(val);
+                if (val > 998f)
+                {
+                    int audoClipint = UnityEngine.Random.Range(0, ghostlaughclips.Length);
+                    audioData.clip = ghostlaughclips[audoClipint];
+                    audioData.Play();
+                }
+            }
         }
     }
 
