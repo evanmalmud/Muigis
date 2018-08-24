@@ -10,6 +10,7 @@ TagManager:
   - Vac
   - Door
   - Interactable
+  - Drops
   layers:
   - Default
   - TransparentFX
@@ -22,7 +23,7 @@ TagManager:
   - Player
   - Background
   - Tileset
-  - 
+  - Drops
   - 
   - 
   - 

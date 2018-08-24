@@ -21,6 +21,11 @@ public class MuigiBox : MonoBehaviour {
         {
             parentClass.nearDoor = true;
         }
+        else if (collider.gameObject.tag == "Drops")
+        {
+            parentClass.CoinCaptured();
+            Destroy(collider.gameObject);
+        }
     }    
     void OnTriggerStay2D(Collider2D collider)
     {

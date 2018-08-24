@@ -181,6 +181,15 @@ MonoBehaviour:
   rotSpeed: 1
   goingRight: 0
   recenter: 0
+  drops:
+  - {fileID: 1558466372581658, guid: 699de75244c55fa43b90be82a0ff1cc1, type: 2}
+  - {fileID: 1632439081133742, guid: adff3d23e51c0aa448e52d8ca2d5488c, type: 2}
+  - {fileID: 1113288087443498, guid: 54d9decc0cfbdbe44820feb091fe5cf2, type: 2}
+  - {fileID: 1114258633214822, guid: b5bff1c9818a68c4391c56e0a3bb8937, type: 2}
+  dropList: []
+  maxDrops: 20
+  timeBetweenDrops: 0.5
+  coinholder: {fileID: 0}
 --- !u!212 &212976874130039270
 SpriteRenderer:
   m_ObjectHideFlags: 1

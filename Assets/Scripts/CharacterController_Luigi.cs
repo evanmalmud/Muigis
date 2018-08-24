@@ -15,9 +15,9 @@ public class CharacterController_Luigi : MonoBehaviour {
     private TextMeshProUGUI ghostCountText;
     public int ghostsCaptured = 0;
 
-    //public GameObject cashCount;
-    //private TextMeshProUGUI cashCountText;
-    //public int cashCollected = 0;
+    public GameObject cashCount;
+    private TextMeshProUGUI cashCountText;
+    public int cashCollected = 0;
 
     //public float maxSpeed = 10f;
     bool facingRight = true;
@@ -49,16 +49,17 @@ public class CharacterController_Luigi : MonoBehaviour {
     public bool nearDoor = false;
     private AudioSource audioData;
 
+    public AudioClip[] hurtclips;
+    public AudioClip[] deathclips;
+    public AudioClip[] pickupclips;
 
     // Use this for initialization
     void Start () {
         audioData = GetComponent<AudioSource>();
         MenuManager = GameObject.Find("Manager");
         screenManager = MenuManager.GetComponent<ScreenManager>();
-        ghostCount = GameObject.Find("GhostText");
         ghostCountText = ghostCount.GetComponent<TextMeshProUGUI>();
-        //cashCount = GameObject.Find("CashText");
-        //cashCountText = cashCount.GetComponent<TextMeshProUGUI>();
+        cashCountText = cashCount.GetComponent<TextMeshProUGUI>();
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         SetFlashlight(false);
@@ -97,8 +98,8 @@ public class CharacterController_Luigi : MonoBehaviour {
         health = 3;
         UpdateHealth();
         ghostsCaptured = 0;
-        //UpdateCashCount();
-        //cashCollected = 0;
+        cashCollected = 0;
+        UpdateCashCount();
         UpdateGhostCount();
         SetFlashlight(false);
         SetVac(false);
@@ -265,10 +266,29 @@ public class CharacterController_Luigi : MonoBehaviour {
         UpdateGhostCount();
     }
 
+    public void CoinCaptured()
+    {
+        cashCollected++;
+
+        UpdateCashCount();
+        if (cashCollected % 20 == 0)
+        {
+            audioData.Stop();
+            int audoClipint = UnityEngine.Random.Range(0, pickupclips.Length);
+            audioData.clip = pickupclips[audoClipint];
+            audioData.Play();
+        }
+    }
+
     public void Hurt(Collider2D collider)
     {   
         if(!invulnerable)
         {
+            audioData.Stop();
+            int audoClipint = UnityEngine.Random.Range(0, hurtclips.Length);
+            audioData.clip = hurtclips[audoClipint];
+            audioData.Play();
+
             health--;
             Vector2 knockback = new Vector2(transform.position.x - collider.gameObject.transform.position.x,
                                             transform.position.y - collider.gameObject.transform.position.y);
@@ -302,18 +322,22 @@ public class CharacterController_Luigi : MonoBehaviour {
         ghostCountText.text = ghostsCaptured.ToString();
     }
 
-    //public void UpdateCashCount()
-    //{
-    //   cashCountText.text = cashCollected.ToString();
-    //}
+    public void UpdateCashCount()
+    {
+       cashCountText.text = cashCollected.ToString();
+    }
 
     public void CheckDead()
     {
         if(health <= 0 )
         {
             dead = true;
-            resetCharacter();
+            audioData.Stop();
+            int audoClipint = UnityEngine.Random.Range(0, deathclips.Length);
+            audioData.clip = deathclips[audoClipint];
+            audioData.Play();
             screenManager.gameOver();
+            resetCharacter();
         }
     }
 }

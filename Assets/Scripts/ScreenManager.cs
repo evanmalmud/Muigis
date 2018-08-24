@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class ScreenManager : MonoBehaviour {
@@ -11,6 +12,13 @@ public class ScreenManager : MonoBehaviour {
     public GameObject ControlsScreen;
     private CanvasGroup ControlsCanvasGroup;
 
+    public GameObject gameOverghostCount;
+    private TextMeshProUGUI ghostCountText;
+    public GameObject gameOvercashCount;
+    private TextMeshProUGUI cashCountText;
+    public GameObject gameOvertimeCount;
+    private TextMeshProUGUI timeCountText;
+
     public GameObject muigi;
     private CharacterController_Luigi ccmuigi;
     public float fadeInTime = 3f;
@@ -18,8 +26,19 @@ public class ScreenManager : MonoBehaviour {
     public GameObject spawnerGameObject;
     public Spawner spawner;
 
-	// Use this for initialization
-	void Start () {
+    public GameObject[] props;
+
+    public float timePlaying = 0f;
+    public bool counting = false;
+    public GameObject uiTimer;
+    private TextMeshProUGUI uiTimerText;
+
+    // Use this for initialization
+    void Start () {
+        ghostCountText = gameOverghostCount.GetComponent<TextMeshProUGUI>();
+        cashCountText = gameOvercashCount.GetComponent<TextMeshProUGUI>();
+        timeCountText = gameOvertimeCount.GetComponent<TextMeshProUGUI>();
+        uiTimerText = uiTimer.GetComponent<TextMeshProUGUI>();
         spawner = spawnerGameObject.GetComponent<Spawner>();
         MainMenuCanvasGroup = MainMenuScreen.GetComponent<CanvasGroup>();
         GameOverCanvasGroup = GameOverScreen.GetComponent<CanvasGroup>();
@@ -33,11 +52,27 @@ public class ScreenManager : MonoBehaviour {
         EnableCanvas(MainMenuCanvasGroup);
     }
 
+    void Update()
+    {
+        if (counting) {
+            timePlaying += Time.deltaTime;
+
+            uiTimerText.text = getTimeString(timePlaying);
+        }
+    }
+
+    string getTimeString(float num){
+        string minutes = Mathf.Floor(num / 60).ToString("00");
+        string seconds = (num % 60).ToString("00.00");
+        return string.Format("{0}:{1}", minutes, seconds);
+    }
+
     public void play()
     {
         FadeOut(ControlsCanvasGroup);
         changePlayerState(true);
         spawner.setSpawn(true);
+        counting = true;
     }
 
     public void showControls()
@@ -49,15 +84,25 @@ public class ScreenManager : MonoBehaviour {
 
     public void replay()
     {
+        timePlaying = 0;
+        counting = true;
         FadeOut(GameOverCanvasGroup);
         ccmuigi.resetCharacter();
         changePlayerState(true);
         spawner.setSpawn(true);
+        foreach(GameObject prop in props)
+        {
+            prop.GetComponent<PropInteract>().Reset();
+        }
     }
 
     public void gameOver()
     {
+        counting = false;
         GameOverScreen.SetActive(true);
+        cashCountText.text = ccmuigi.cashCollected.ToString();
+        ghostCountText.text = ccmuigi.ghostsCaptured.ToString();
+        timeCountText.text = getTimeString(timePlaying);
         FadeIn(GameOverCanvasGroup);
         changePlayerState(false);
         spawner.deleteAll();

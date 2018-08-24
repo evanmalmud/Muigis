@@ -19,7 +19,6 @@ public class Spawner : MonoBehaviour {
 
     public List<GameObject> listGhosts;
 
-    public float timePlaying = 0f;
     public bool startCounting = false;
 
     public AudioClip[] ghostlaughclips;
@@ -35,11 +34,9 @@ public class Spawner : MonoBehaviour {
     {
         if (startCounting)
         {
-            timePlaying += Time.deltaTime;
             if (!audioData.isPlaying)
             {
                 float val = Random.Range(0, 1000);
-                //print(val);
                 if (val > 998f)
                 {
                     int audoClipint = UnityEngine.Random.Range(0, ghostlaughclips.Length);
@@ -56,7 +53,6 @@ public class Spawner : MonoBehaviour {
         {
             float val = Random.value;
             int enemyNum = 0;
-            //if (timePlaying > 0f){
                 if(val > .5) //50% chance
                 {
                     enemyNum = 0;
@@ -72,7 +68,6 @@ public class Spawner : MonoBehaviour {
                 else {
                     enemyNum = 3;
                 }
-            //}
             int spawnPointNum = Random.Range(0, spawnPoints.Length);
             GameObject temp = Instantiate(ghosts[enemyNum], spawnPoints[spawnPointNum].transform);
             listGhosts.Add(temp);

@@ -17,14 +17,39 @@ public class PropInteract : MonoBehaviour {
     public bool goingRight = false;
     public bool recenter = false;
 
+    public GameObject[] drops;
+    public List<GameObject> dropList;
+    public int maxDrops = 20;
+    public float timeBetweenDrops = .5f;
+    float dropCountdown = 0f;
+    bool canDrop = true;
+
+    public GameObject coinholder;
+
     // Use this for initialization
     void Start () {
+        coinholder = GameObject.Find("CoinHolder");
         audioData = GetComponent<AudioSource>();
         maxRads = maxAngle * Mathf.Deg2Rad;
+        dropCountdown = 0f;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    public void Reset()
+    {
+        foreach(GameObject drop in dropList)
+        {
+            if (drop)
+                Destroy(drop);
+        }
+        dropList.Clear();
+        dropCountdown = 0f;
+        canDrop = true;
+        shakeCount = shakeCountDefault;
+        shake = false;
+    }
+
+    // Update is called once per frame
+    void Update () {
         if(shake){
             //move object
             //play sound
@@ -32,6 +57,7 @@ public class PropInteract : MonoBehaviour {
             recenter = false;
             if (!audioData.isPlaying)
                 audioData.Play();
+            shakeDrops();
         }
         else
         {
@@ -39,6 +65,7 @@ public class PropInteract : MonoBehaviour {
             shakeRot();
         }
         ShakeCountdown();
+        DropCountdown();
 	}
 
     void OnTriggerEnter2D(Collider2D collider)
@@ -90,16 +117,16 @@ public class PropInteract : MonoBehaviour {
         }
         else if (!goingRight)
         {
-            print("here1" + transform.rotation.z);
+            //print("here1" + transform.rotation.z);
             if (transform.rotation.z < -maxRads)
             {
-                print("here2");
+                //print("here2");
                 goingRight = true;
                 rot.z = rotSpeed;
             }
             else
             {
-                print("here3");
+                //print("here3");
                 rot.z = - rotSpeed;
             }
         }
@@ -120,6 +147,36 @@ public class PropInteract : MonoBehaviour {
                 shakeCount = shakeCountDefault;
                 shake = false;
             }
+        }
+    }
+    void DropCountdown()
+    {
+        if (!canDrop)
+        {
+            if (dropCountdown < timeBetweenDrops)
+            {
+                dropCountdown += Time.deltaTime;
+            }
+            else
+            {
+                dropCountdown = 0f;
+                canDrop = true;
+            }
+        }
+    }
+
+    void shakeDrops()
+    {
+        if(dropList.Count < maxDrops && canDrop){
+            int index = Random.Range(0, drops.Length);
+            GameObject temp = Instantiate(drops[index], transform);
+            temp.transform.SetParent(coinholder.transform);
+            //Rigidbody2D tempRb = temp.GetComponent<Rigidbody2D>();
+            //float randomX = Random.Range(-1f, 1f);
+            dropList.Add(temp);
+
+            //tempRb.AddForce(new Vector2(randomX, 1f) * 2);
+            canDrop = false;
         }
     }
 }
